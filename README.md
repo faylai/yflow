@@ -18,7 +18,7 @@ $ npm install yflow
 ```
 
 
-## Example
+## Example 1
 
 ```js
 var yflow = require('yflow');
@@ -49,6 +49,26 @@ yflow(function  * () {
 	}
 });
 
+```
+## Example 2
+
+```js
+yflow(function  * () {	
+    var wrapper=yflow.wrap(netGet)
+	var ret = yield wrapper("baidu.com");
+	console.log("ret is :" +ret);
+	console.log("sleep one second");
+	yield yflow.sleep(1000);
+	console.log("I'm awake!");	
+	var p = yield[ wrapper("f4"), wrapper("f5"), wrapper("f6")];
+	console.log(p);
+})(function (e) {
+	if(!e){
+	   console.log("OK!");
+	}else{
+	   console.log(e.stack);
+	}
+});
 ```
 
 ## License
