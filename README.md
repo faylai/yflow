@@ -38,7 +38,8 @@ yflow(function  * () {
 	console.log("ret is :" +ret);
 	console.log("sleep one second");
 	yield yflow.sleep(1000);
-	console.log("I'm awake!");	
+	console.log("I'm awake!");
+	// run in parallel
 	var p = yield[ ynet.post("f1"), ynet.post("f2"), ynet.post("f4")];
 	console.log(p);
 })(function (e) {
@@ -65,6 +66,7 @@ yflow(function  * () {
 	console.log("sleep one second");
 	yield yflow.sleep(1000);
 	console.log("I'm awake!");	
+	// run in parallel
 	var p = yield[ wrapper("f4"), wrapper("f5"), wrapper("f6")];
 	console.log(p);
 })(function (e) {
