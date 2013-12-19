@@ -1,5 +1,6 @@
 var slice = Array.prototype.slice;
-function gen(fn) {
+module.exports = yflow;
+function yflow(fn) {
 	var doneFn = function () {};
 	var ctx = this,
 	genFn,
@@ -31,7 +32,7 @@ function gen(fn) {
 			return doneFn(null, ret.value);
 		}
 
-		ret.value = gen.toThunk(ret.value, ctx);
+		ret.value = yflow.toThunk(ret.value, ctx);
 
 		// run
 		if ('function' == typeof ret.value) {
@@ -64,6 +65,12 @@ function gen(fn) {
 	}
 }
 
+
+yflow.sleep = function (time) {
+	return function (fn) {
+		setTimeout(fn, time || 100);
+	}
+}
 function wrapFunction(fn, ctx) {
 	return function () {
 		var args = slice.call(arguments, 0);
@@ -73,37 +80,33 @@ function wrapFunction(fn, ctx) {
 		}
 	}
 }
-gen.sleep = function (time) {
-	return function (fn) {
-		setTimeout(fn, time || 100);
-	}
-}
-gen.wrap = function (obj) {
+yflow.wrap = function (obj) {
 	if (typeof obj == 'function') {
 		return wrapFunction.apply(null, arguments);
 	} else {
+	    var wrapper={};
 		for (var p in obj) {
 			if (obj.hasOwnProperty(p)) {
-				if (typeof obj == 'function') {
-					wrapFunction(obj, obj[p]);
+				if (typeof obj[p] == 'function') {
+					wrapper[p]=wrapFunction(obj[p],obj);
 				}
 			}
 		}
+		return wrapper;
 	}
 }
-gen.toThunk = function (obj) {
+yflow.toThunk = function (obj) {
 	if (Array.isArray(obj)) {
-		return gen.arrayToThunk(obj);
+		return yflow.arrayToThunk(obj);
 	}
 	return obj;
 }
-gen.arrayToThunk = function (fns) {
+yflow.arrayToThunk = function (fns) {
 	var ctx = this;
 	return function (done) {
 		var pending = fns.length;
 		var results = new Array(pending);
 		var finished;
-
 		if (!pending) {
 			setImmediate(function () {
 				done(null, results);
@@ -114,7 +117,6 @@ gen.arrayToThunk = function (fns) {
 		for (var i = 0; i < fns.length; i++) {
 			run(fns[i], i);
 		}
-
 		function run(fn, i) {
 			if (finished)
 				return;
@@ -139,5 +141,3 @@ gen.arrayToThunk = function (fns) {
 		}
 	}
 };
-
-
