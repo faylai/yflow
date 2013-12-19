@@ -53,6 +53,11 @@ yflow(function  * () {
 ## Example 2
 
 ```js
+function netGet(url, cb) {
+	setTimeout(function () {
+		cb(null, "response from url:" + url)
+	}, 500);
+}
 yflow(function  * () {	
     var wrapper=yflow.wrap(netGet)
 	var ret = yield wrapper("baidu.com");
