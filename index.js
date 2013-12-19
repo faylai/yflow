@@ -22,7 +22,15 @@ function yflow(fn) {
 		// ok
 		if (!err) {
 			try {
-				ret = genFn.send(res || null);
+				var isRun = false;
+				if (genFn.send) {
+					isRun = true;
+					ret = genFn.send(res || null);
+				}
+				if (!isRun) {
+					ret = genFn.next(res);
+				}
+
 			} catch (e) {
 				return doneFn(e);
 			}
@@ -65,7 +73,6 @@ function yflow(fn) {
 	}
 }
 
-
 yflow.sleep = function (time) {
 	return function (fn) {
 		setTimeout(fn, time || 100);
@@ -84,11 +91,11 @@ yflow.wrap = function (obj) {
 	if (typeof obj == 'function') {
 		return wrapFunction.apply(null, arguments);
 	} else {
-	    var wrapper={};
+		var wrapper = {};
 		for (var p in obj) {
 			if (obj.hasOwnProperty(p)) {
 				if (typeof obj[p] == 'function') {
-					wrapper[p]=wrapFunction(obj[p],obj);
+					wrapper[p] = wrapFunction(obj[p], obj);
 				}
 			}
 		}
